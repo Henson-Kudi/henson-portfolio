@@ -1,0 +1,145 @@
+/* PDF Resume Styles */
+.resume-container {
+  font-family: "Arial", sans-serif;
+  color: #000;
+  background-color: #fff;
+  max-width: 210mm; /* A4 width */
+  height: 297mm; /* A4 height */
+  margin: 0 auto;
+  padding: 20px 25px;
+  box-sizing: border-box;
+  line-height: 1.3;
+}
+
+.resume-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header */
+.resume-header {
+  margin-bottom: 15px;
+}
+
+.resume-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 2px 0;
+}
+
+.resume-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 2px 0;
+}
+
+.resume-subtitle {
+  font-size: 12px;
+  margin: 0 0 2px 0;
+  font-weight: normal;
+}
+
+.resume-contact {
+  font-size: 12px;
+  margin: 0;
+  font-weight: normal;
+}
+
+/* Content */
+.resume-content {
+  flex: 1;
+}
+
+/* Sections */
+.resume-section {
+  margin-bottom: 15px;
+}
+
+.resume-section-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+}
+
+/* Skills */
+.resume-skills-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.resume-skill-item {
+  font-size: 12px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.resume-skill-bullet {
+  margin-right: 5px;
+  min-width: 12px;
+  display: inline-block;
+}
+
+/* Jobs */
+.resume-job {
+  margin-bottom: 12px;
+}
+
+.resume-job-header {
+  margin-bottom: 3px;
+}
+
+.resume-job-company-title {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 1px;
+}
+
+.resume-job-company {
+  font-weight: bold;
+}
+
+.resume-job-title {
+  font-weight: bold;
+}
+
+.resume-job-period {
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.resume-job-responsibilities {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.resume-job-responsibility {
+  font-size: 12px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.resume-responsibility-bullet {
+  margin-right: 5px;
+  min-width: 12px;
+  display: inline-block;
+}
+
+/* Print-specific styles */
+@media print {
+  .resume-container {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 20px 25px;
+  }
+
+  /* Ensure no page breaks inside job entries */
+  .resume-job {
+    page-break-inside: avoid;
+  }
+}
