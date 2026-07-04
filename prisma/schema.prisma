@@ -1,0 +1,110 @@
+// Prisma schema — Henson portfolio CMS
+// DB: Neon Postgres. DATABASE_URL = pooled connection. Workflow: `prisma db push`.
+// Data model mirrors the design's store.js so the admin + public pages line up.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Selected work / projects. Rich enough to drive both the cards and the
+/// case-study detail page (overview → problem → contribution → challenges → outcomes).
+model Project {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  badge        String? // short chip, e.g. "Founder", "Team Lead"
+  role         String? // e.g. "Founder & Lead Engineer"
+  org          String? // company / org
+  summary      String // card + section blurb
+  // case-study body (all optional; shown on the detail page when present)
+  overview     String?
+  problem      String?
+  contribution String?
+  challenges   String?
+  outcomes     String?
+  coverImage   String?
+  stack        String[] @default([])
+  liveUrl      String?
+  repoUrl      String?
+  caseStudyUrl String?
+  confidential Boolean  @default(false)
+  featured     Boolean  @default(false)
+  published    Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, featured, order])
+}
+
+/// Blog / writing entries. `body` holds rich-text HTML from the admin editor.
+model Post {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  excerpt        String?
+  body           String    @default("") // HTML
+  coverImage     String?
+  tags           String[]  @default([])
+  featured       Boolean   @default(false)
+  published      Boolean   @default(false)
+  publishedAt    DateTime? // the display date
+  readingMinutes Int?
+  order          Int       @default(0)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([published, featured, order])
+}
+
+/// Work experience — drives the homepage timeline AND the generated CV.
+/// endDate null = "Present". Sorted by startDate desc.
+model Experience {
+  id         String    @id @default(cuid())
+  role       String
+  company    String // may include product, e.g. "ITSEC · Nexus Crypto Exchange"
+  location   String?
+  startDate  DateTime
+  endDate    DateTime? // null = Present
+  summary    String    @default("") // paragraph shown on the homepage
+  highlights String[]  @default([]) // bullet points for the CV
+  published  Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([published, startDate])
+}
+
+/// Client / teammate references.
+model Testimonial {
+  id            String   @id @default(cuid())
+  quote         String
+  authorName    String
+  authorRole    String?
+  authorCompany String?
+  avatarUrl     String?
+  published     Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// Singleton row holding editable homepage SEO / metadata.
+model SeoSettings {
+  id              String   @id @default("homepage")
+  metaTitle       String
+  metaDescription String
+  keywords        String[] @default([])
+  author          String?
+  ogImage         String?
+  canonicalUrl    String?
+  twitterHandle   String?
+  updatedAt       DateTime @updatedAt
+}

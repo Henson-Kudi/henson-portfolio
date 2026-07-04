@@ -1,47 +1,47 @@
 import type React from "react"
-import type { Metadata } from "next/dist/lib/metadata/types/metadata-interface"
-import ClientLayout from "./ClientLayout"
+import type { Metadata } from "next"
+import { cookies } from "next/headers"
+import { Analytics } from "@vercel/analytics/react"
+import { fontVariables } from "@/lib/fonts"
+import { Providers } from "@/components/providers"
+import "./globals.css"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://amahkudi.dev"),
   title: {
-    default: "Henson Kudi Amah | Senior Software Engineer",
+    default: "Henson Kudi Amah — Senior Full-Stack Engineer & Team Lead",
     template: "%s | Henson Kudi Amah",
   },
   description:
-    "Experienced Software Engineer with 5+ years in software development, microservices, and blockchain integration. Expert in Node.js, ASP.NET Core, and Python.",
-  keywords: ["Software Engineer", "Python Developer", "Node.js", "Node Js Developer", "Backend Development", "Software Development", "Typescript", "C#", "Microservices", "CICD", "DevOps", "Frontend Developer", "Fullstack Developer", "Docker", "Kubernetes", "Henson Kudi Amah"],
+    "Senior full-stack engineer in Dubai building secure, high-availability backends for fintech, payments and crypto.",
   authors: [{ name: "Henson Kudi Amah" }],
   creator: "Henson Kudi Amah",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://amahkudi.dev",
-    title: "Henson Kudi Amah | Senior Software Engineer",
-    description:
-      "Experienced Software Engineer with 5+ years in software development, microservices, and blockchain integration. Expert in Node.js, ASP.NET Core, and Python.",
-    siteName: "Henson's Portfolio",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Henson Kudi Amah | Senior Software Engineer",
-    description:
-      "Experienced Software Engineer with 5+ years in software development, microservices, and blockchain integration. Expert in Node.js, ASP.NET Core, and Python.",
-  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  generator: 'Next.js'
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return <ClientLayout>{children}</ClientLayout>
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Theme is stored in a cookie and applied server-side — no client init
+  // script (avoids React 19's script warning) and no flash of the wrong theme.
+  const isDark = (await cookies()).get("theme")?.value === "dark"
+
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${fontVariables}${isDark ? " dark" : ""}`}
+    >
+      {/* suppressHydrationWarning: browser extensions add attributes to <body>. */}
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-background font-sans text-foreground antialiased"
+      >
+        <Providers>{children}</Providers>
+        <Analytics />
+      </body>
+    </html>
+  )
 }
-
-
-import './globals.css'
