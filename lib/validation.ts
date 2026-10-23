@@ -3,13 +3,26 @@ import { z } from "zod"
 // Shared validation for API routes AND client forms (so the same checks run
 // before submitting to the server). Keep field names aligned with Prisma.
 
+// Optional URL. An empty string means "clear it" → null (Prisma ignores
+// undefined, so undefined could never remove a value once saved).
 const optionalUrl = z
   .string()
   .trim()
   .url("Must be a valid URL")
   .or(z.literal(""))
+  .nullable()
   .optional()
-  .transform((v) => (v === "" ? undefined : v))
+  .transform((v) => (v === "" ? null : v))
+
+// Optional free text with the same clear-on-empty behaviour.
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullable()
+    .optional()
+    .transform((v) => (v === "" ? null : v))
 
 const slug = z
   .string()
@@ -40,20 +53,45 @@ export const projectInput = z.object({
 })
 export const projectUpdate = projectInput.partial()
 
+// A cited source: label + public URL. Stored as JSON on the post.
+export const postSource = z.object({
+  label: z.string().trim().min(1, "Source label is required").max(160),
+  url: z.string().trim().url("Source must be a valid URL"),
+})
+export type PostSource = z.infer<typeof postSource>
+
 export const postInput = z.object({
   title: z.string().trim().min(1, "Title is required").max(160),
   slug: slug.optional(),
-  excerpt: z.string().trim().max(400).optional(),
+  excerpt: optionalText(400),
   body: z.string().default(""),
   coverImage: optionalUrl,
+  coverAlt: optionalText(400),
   tags: z.array(z.string().trim().min(1)).max(24).default([]),
   featured: z.boolean().default(false),
   published: z.boolean().default(false),
   publishedAt: z.coerce.date().optional(),
   readingMinutes: z.number().int().min(0).max(600).optional(),
+  wordCount: z.number().int().min(0).optional(),
   order: z.number().int().min(0).default(0),
-  seoTitle: z.string().trim().max(160).optional(),
-  seoDescription: z.string().trim().max(320).optional(),
+  // SEO
+  seoTitle: optionalText(160),
+  seoDescription: optionalText(320),
+  primaryKeyword: optionalText(120),
+  keywords: z.array(z.string().trim().min(1).max(80)).max(24).default([]),
+  canonicalUrl: optionalUrl,
+  // Taxonomy
+  category: optionalText(120),
+  postType: optionalText(60),
+  // Internal links — slugs of other posts
+  hubSlug: slug
+    .or(z.literal(""))
+    .nullable()
+    .optional()
+    .transform((v) => (v === "" ? null : v)),
+  relatedSlugs: z.array(slug).max(24).default([]),
+  sources: z.array(postSource).max(40).default([]),
+  shareText: optionalText(3000),
 })
 export const postUpdate = postInput.partial()
 

@@ -162,6 +162,7 @@ export function PostsManager({ initial }: { initial: Post[] }) {
         {open && (
           <PostForm
             initial={editing}
+            others={items}
             onCancel={() => setOpen(false)}
             onSaved={onSaved}
             onError={(m) => toast.error(m)}

@@ -43,6 +43,8 @@ model Project {
 }
 
 /// Blog / writing entries. `body` holds rich-text HTML from the admin editor.
+/// The SEO / publishing-pack fields (keywords, category, internal links,
+/// sources, share text) feed the public page's meta tags and JSON-LD.
 model Post {
   id             String    @id @default(cuid())
   slug           String    @unique
@@ -50,14 +52,30 @@ model Post {
   excerpt        String?
   body           String    @default("") // HTML
   coverImage     String?
+  coverAlt       String? // alt text for the cover (accessibility + image SEO)
   tags           String[]  @default([])
   featured       Boolean   @default(false)
   published      Boolean   @default(false)
   publishedAt    DateTime? // the display date
-  readingMinutes Int?
+  readingMinutes Int? // auto-computed from the body on save
+  wordCount      Int? // auto-computed from the body on save
   order          Int       @default(0)
+  // SEO
   seoTitle       String?
-  seoDescription String?
+  seoDescription String? // meta description (aim for ≤160 chars)
+  primaryKeyword String? // the one phrase the post targets
+  keywords       String[]  @default([]) // secondary keywords → meta keywords + JSON-LD
+  canonicalUrl   String? // set only when the post was first published elsewhere
+  // Editorial taxonomy
+  category       String? // cluster, e.g. "Money-moving systems"
+  postType       String? // "Explainer", "Story", "Guide" …
+  // Internal links (slugs of other posts). Rendered only when the target is published.
+  hubSlug        String? // the hub / pillar post this one sits under
+  relatedSlugs   String[]  @default([]) // across / down links
+  // Sources cited: [{ label, url }]
+  sources        Json      @default("[]")
+  // Social share blurb (LinkedIn etc.) — stored for copy/paste, never rendered publicly.
+  shareText      String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

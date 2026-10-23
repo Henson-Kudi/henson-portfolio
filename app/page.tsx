@@ -96,8 +96,39 @@ export default async function HomePage() {
     experienceRepo.listPublished(),
   ])
 
+  // Person + WebSite structured data: tells search engines who the site is
+  // about (name, role, location, profiles) so the name query shows a rich card.
+  const personLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `${site.website}/#person`,
+        name: site.name,
+        jobTitle: site.role,
+        url: site.website,
+        email: `mailto:${site.email}`,
+        address: { "@type": "PostalAddress", addressLocality: "Dubai", addressCountry: "AE" },
+        sameAs: Object.values(site.socials),
+        knowsAbout: ["Fintech", "Payments", "Crypto custody", "Backend architecture", "Node.js", "TypeScript", "AWS"],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${site.website}/#website`,
+        url: site.website,
+        name: site.name,
+        publisher: { "@id": `${site.website}/#person` },
+        inLanguage: "en",
+      },
+    ],
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd).replace(/</g, "\\u003c") }}
+      />
       <SiteNav />
 
       {/* HERO */}

@@ -37,7 +37,7 @@ export function Drawer({
       />
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-[min(680px,94vw)] flex-col border-l border-border bg-background transition-transform duration-300",
+          "fixed inset-y-0 right-0 z-50 flex w-[min(880px,96vw)] flex-col border-l border-border bg-background transition-transform duration-300",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
