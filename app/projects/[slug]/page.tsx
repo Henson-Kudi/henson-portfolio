@@ -121,7 +121,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div
-          className="my-10 grid h-[340px] place-items-center rounded-md border border-border font-mono text-xs tracking-[0.08em] text-muted-foreground"
+          className="my-10 grid aspect-[1200/630] max-h-[560px] w-full place-items-center overflow-hidden rounded-md border border-border font-mono text-xs tracking-[0.08em] text-muted-foreground"
           style={
             p.coverImage
               ? { backgroundImage: `url(${p.coverImage})`, backgroundSize: "cover", backgroundPosition: "center" }

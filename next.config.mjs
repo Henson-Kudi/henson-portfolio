@@ -14,6 +14,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Font files read from disk by the generated-image routes must be traced
+  // into those serverless bundles on Vercel.
+  outputFileTracingIncludes: {
+    "/og/project/[slug]": ["./assets/fonts/**"],
+  },
 }
 
 export default nextConfig
