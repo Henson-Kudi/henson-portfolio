@@ -12,12 +12,19 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    // Vercel's optimizer resizes and re-encodes (AVIF/WebP) on the fly.
+    // Covers live on R2 and on this site's own /og routes.
+    remotePatterns: [
+      { protocol: "https", hostname: "*.r2.dev" },
+      { protocol: "https", hostname: "amahkudi.dev" },
+    ],
+    formats: ["image/avif", "image/webp"],
   },
   // Font files read from disk by the generated-image routes must be traced
   // into those serverless bundles on Vercel.
   outputFileTracingIncludes: {
     "/og/project/[slug]": ["./assets/fonts/**"],
+    "/og/share": ["./assets/fonts/**", "./public/images/profile.jpg"],
   },
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
@@ -128,13 +129,15 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 
         {p.coverImage && (
           <figure className="mt-10">
-            {/* Plain <img>: covers are external URLs and next/image is unoptimized here. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            {/* LCP element: priority + sizes so the optimizer serves a right-sized AVIF/WebP. */}
+            <Image
               src={p.coverImage}
               alt={p.coverAlt ?? ""}
+              width={1200}
+              height={630}
+              priority
+              sizes="(max-width: 1120px) 100vw, 1040px"
               className="max-h-[520px] w-full rounded-md border border-border object-cover"
-              fetchPriority="high"
             />
           </figure>
         )}
@@ -183,8 +186,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 function AuthorBox() {
   return (
     <aside className="mx-auto flex max-w-[70ch] items-start gap-5 border-t border-border py-8 max-sm:flex-col">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/apple-touch-icon.png"
         alt={site.name}
         width={64}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import type { Project } from "@prisma/client"
 import { projectsRepo } from "@/lib/repositories/projects"
 import { postsRepo } from "@/lib/repositories/posts"
@@ -193,9 +194,9 @@ export default async function HomePage() {
               <div className="border-l border-border pl-8 max-md:border-l-0 max-md:pl-0">
                 {about.side.map((block) => (
                   <div key={block.heading} className="mb-[30px] last:mb-0">
-                    <h4 className="mb-3.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                    <h3 className="mb-3.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                       {block.heading}
-                    </h4>
+                    </h3>
                     <ul>
                       {block.items.map((it) => (
                         <li
@@ -299,9 +300,9 @@ export default async function HomePage() {
             <div className="grid grid-cols-3 gap-10 max-md:grid-cols-1">
               {stack.map((col) => (
                 <div key={col.heading}>
-                  <h4 className="mb-[18px] border-b border-border pb-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-brand">
+                  <h3 className="mb-[18px] border-b border-border pb-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-brand">
                     {col.heading}
-                  </h4>
+                  </h3>
                   <ul>
                     {col.items.map((it) => (
                       <li key={it} className="py-1.5 text-base text-ink-soft">
@@ -455,12 +456,12 @@ function ProjectRow({ project: p, reversed }: { project: Project; reversed: bool
         }}
       >
         {p.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={p.coverImage}
             alt={`${p.title} cover`}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 560px"
+            className="object-cover"
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">

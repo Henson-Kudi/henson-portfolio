@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
 import { PageHead } from "@/components/site/page-head"
@@ -116,11 +117,12 @@ export default async function BlogPage({
                       )}
                     </div>
                     {p.coverImage && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={p.coverImage}
                         alt={p.coverAlt ?? ""}
-                        loading="lazy"
+                        width={1200}
+                        height={630}
+                        sizes="(max-width: 640px) 100vw, 220px"
                         className="aspect-[16/10] w-full rounded border border-border object-cover max-md:hidden max-sm:order-first max-sm:block max-sm:aspect-[16/9]"
                       />
                     )}

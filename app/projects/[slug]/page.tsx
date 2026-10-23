@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
@@ -125,8 +126,15 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           style={p.coverImage ? undefined : { backgroundImage: stripes }}
         >
           {p.coverImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={p.coverImage} alt={`${p.title} cover`} className="h-full w-full object-cover" fetchPriority="high" />
+            <Image
+              src={p.coverImage}
+              alt={`${p.title} cover`}
+              width={1200}
+              height={630}
+              priority
+              sizes="(max-width: 1120px) 100vw, 1040px"
+              className="h-full w-full object-cover"
+            />
           ) : (
             `[ ${p.title.toLowerCase()} ]`
           )}

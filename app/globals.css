@@ -21,7 +21,7 @@
     --secondary: 41 33% 91%; /* paper-2 #efeadf */
     --secondary-foreground: 45 11% 21%;
     --muted: 41 33% 91%;
-    --muted-foreground: 46 12% 42%; /* #78725f */
+    --muted-foreground: 46 12% 37%; /* #6a644f — ≥4.5:1 on paper for 11px mono labels */
     --accent: 41 33% 88%; /* subtle warm hover surface */
     --accent-foreground: 43 14% 10%;
     --destructive: 0 68% 44%;
