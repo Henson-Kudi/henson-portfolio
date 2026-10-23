@@ -39,6 +39,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         suppressHydrationWarning
         className="min-h-screen bg-background font-sans text-foreground antialiased"
       >
+        {/* React 19 hoists <link> into <head>. Page-level `alternates` would
+            override a metadata-level entry, so the feed link lives here. */}
+        <link rel="alternate" type="application/rss+xml" title="Henson Kudi Amah — Writing" href="/feed.xml" />
         <Providers>{children}</Providers>
         <Analytics />
       </body>

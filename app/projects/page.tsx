@@ -6,13 +6,18 @@ import { ProjectCard } from "@/components/site/project-card"
 import { Pager } from "@/components/site/pager"
 import { projectsRepo } from "@/lib/repositories/projects"
 import { normalizePageParams } from "@/lib/pagination"
+import { SITE_URL } from "@/lib/post-utils"
 
 export const dynamic = "force-dynamic"
 
+const description =
+  "Backends and products for fintech, payments and crypto — from a VARA-regulated exchange to an offline-first platform for shop owners in Cameroon."
+
 export const metadata: Metadata = {
   title: "Selected work",
-  description:
-    "Backends and products for fintech, payments and crypto — from a VARA-regulated exchange to an offline-first platform for shop owners in Cameroon.",
+  description,
+  alternates: { canonical: `${SITE_URL}/projects` },
+  openGraph: { type: "website", url: `${SITE_URL}/projects`, title: "Selected work", description },
 }
 
 const wrap = "mx-auto max-w-[1120px] px-10 max-sm:px-6"

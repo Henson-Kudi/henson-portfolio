@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
 import { projectsRepo } from "@/lib/repositories/projects"
+import { AUTHOR, SITE_URL } from "@/lib/post-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -17,8 +18,29 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const p = await projectsRepo.getBySlug((await params).slug)
-  if (!p || !p.published) return { title: "Project not found" }
-  return { title: p.title, description: p.summary }
+  if (!p || !p.published) return { title: "Project not found", robots: { index: false } }
+  const url = `${SITE_URL}/projects/${p.slug}`
+  const description = p.summary
+  return {
+    title: p.title,
+    description,
+    keywords: p.stack.length ? p.stack : undefined,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title: p.title,
+      description,
+      siteName: AUTHOR.name,
+      images: p.coverImage ? [{ url: p.coverImage, alt: p.title }] : undefined,
+    },
+    twitter: {
+      card: p.coverImage ? "summary_large_image" : "summary",
+      title: p.title,
+      description,
+      images: p.coverImage ? [p.coverImage] : undefined,
+    },
+  }
 }
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -41,8 +63,41 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     if (p.caseStudyUrl) links.push({ label: "↗ Case study", href: p.caseStudyUrl })
   }
 
+  // Structured data: the project as a CreativeWork by the site owner, plus
+  // breadcrumbs so search results show "Home › Work › Project".
+  const url = `${SITE_URL}/projects/${p.slug}`
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: p.title,
+      description: p.summary,
+      url,
+      image: p.coverImage || undefined,
+      author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
+      creator: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
+      keywords: p.stack.length ? p.stack.join(", ") : undefined,
+      dateCreated: p.createdAt.toISOString(),
+      dateModified: p.updatedAt.toISOString(),
+      inLanguage: "en",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Work", item: `${SITE_URL}/projects` },
+        { "@type": "ListItem", position: 3, name: p.title, item: url },
+      ],
+    },
+  ]
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <SiteNav />
       <div className={wrap}>
         <div className="border-b border-border pb-[34px] pt-[60px]">
