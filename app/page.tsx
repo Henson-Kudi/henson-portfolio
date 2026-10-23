@@ -454,9 +454,19 @@ function ProjectRow({ project: p, reversed }: { project: Project; reversed: bool
             "repeating-linear-gradient(135deg, hsl(var(--paper-2)) 0 12px, hsl(var(--card)) 12px 24px)",
         }}
       >
-        <div className="absolute inset-0 grid place-items-center font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-          [ {p.title.toLowerCase()} ]
-        </div>
+        {p.coverImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={p.coverImage}
+            alt={`${p.title} cover`}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            [ {p.title.toLowerCase()} ]
+          </div>
+        )}
       </div>
       <div className="flex flex-col p-11 max-sm:p-7">
         {p.badge && (
