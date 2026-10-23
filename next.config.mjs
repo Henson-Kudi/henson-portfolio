@@ -24,7 +24,6 @@ const nextConfig = {
   // into those serverless bundles on Vercel.
   outputFileTracingIncludes: {
     "/og/project/[slug]": ["./assets/fonts/**"],
-    "/og/share": ["./assets/fonts/**", "./public/images/profile.jpg"],
   },
 }
 
