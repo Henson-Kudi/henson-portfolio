@@ -4,6 +4,11 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 // Fade + rise on scroll into view. Respects prefers-reduced-motion.
+//
+// Server-rendered VISIBLE: the HTML never hides content, so the first paint
+// is complete before any JavaScript runs (Speed Index, crawlers, JS-off).
+// After mount, sections that are still below the viewport are hidden and
+// revealed as they scroll in; anything already on screen stays as it is.
 export function Reveal({
   children,
   className,
@@ -16,15 +21,20 @@ export function Reveal({
   as?: "div" | "section" | "article" | "header"
 }) {
   const ref = useRef<HTMLElement | null>(null)
-  const [inView, setInView] = useState(false)
+  // "idle" = not yet decided (render visible), "hidden" = waiting to scroll in, "shown" = animate in.
+  const [state, setState] = useState<"idle" | "hidden" | "shown">("idle")
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    // Already in (or near) the viewport: leave it visible, no animation.
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return
+    setState("hidden")
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setInView(true)
+          setState("shown")
           io.disconnect()
         }
       },
@@ -38,10 +48,10 @@ export function Reveal({
     <Tag
       // @ts-expect-error polymorphic ref
       ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={state === "shown" ? { transitionDelay: `${delay}ms` } : undefined}
       className={cn(
-        "transition-all duration-700 ease-out motion-reduce:transition-none",
-        inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0 motion-reduce:opacity-100 motion-reduce:translate-y-0",
+        state !== "idle" && "transition-[opacity,transform] duration-[400ms] ease-out",
+        state === "hidden" && "translate-y-5 opacity-0",
         className,
       )}
     >

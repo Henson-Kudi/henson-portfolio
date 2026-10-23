@@ -135,7 +135,8 @@ export default async function HomePage() {
       {/* HERO */}
       <header id="top" className="border-b border-border py-[100px] max-sm:py-16">
         <div className={wrap}>
-          <Reveal>
+          {/* Above the fold: no reveal animation, so the first paint is complete. */}
+          <div>
             <div className="mb-[34px] inline-flex items-center gap-[9px] font-mono text-xs tracking-[0.06em] text-muted-foreground">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
@@ -171,7 +172,7 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
-          </Reveal>
+          </div>
         </div>
       </header>
 

@@ -7,7 +7,8 @@ import { Newsreader, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
 export const serif = Newsreader({
   subsets: ["latin"],
   display: "swap",
-  weight: ["300", "400", "500", "600"],
+  // 300 and 600 were never used by any serif element; fewer files = fewer late swaps.
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   variable: "--font-serif",
 })
