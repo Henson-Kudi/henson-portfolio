@@ -7,7 +7,7 @@ import { Pager } from "@/components/site/pager"
 import { postsRepo } from "@/lib/repositories/posts"
 import { normalizePageParams } from "@/lib/pagination"
 import { fmtDate } from "@/lib/format"
-import { SITE_URL } from "@/lib/post-utils"
+import { SITE_URL, AUTHOR, postUrl } from "@/lib/post-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -18,7 +18,13 @@ export const metadata: Metadata = {
   title: "Writing",
   description,
   alternates: { canonical: `${SITE_URL}/blog` },
-  openGraph: { type: "website", url: `${SITE_URL}/blog`, title: "Writing", description },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/blog`,
+    title: "Writing",
+    description,
+    images: [{ url: `${SITE_URL}/android-chrome-512x512.png`, alt: "Henson Kudi Amah" }],
+  },
 }
 
 const wrap = "mx-auto max-w-[1120px] px-10 max-sm:px-6"
@@ -32,8 +38,30 @@ export default async function BlogPage({
   const { page, pageSize } = normalizePageParams({ page: sp.page }, { defaultPageSize: 12 })
   const result = await postsRepo.listPublished({ page, pageSize })
 
+  const blogLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Writing",
+    description,
+    url: `${SITE_URL}/blog`,
+    author: { "@id": AUTHOR.id },
+    publisher: { "@id": AUTHOR.id },
+    blogPost: result.items.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.seoTitle || p.title,
+      url: postUrl(p.slug),
+      datePublished: p.publishedAt?.toISOString(),
+      image: p.coverImage || undefined,
+      author: { "@id": AUTHOR.id },
+    })),
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd).replace(/</g, "\\u003c") }}
+      />
       <SiteNav />
       <div className={wrap}>
         <PageHead

@@ -40,7 +40,23 @@ export function postSources(p: Pick<Post, "sources">): PostSource[] {
 
 export const SITE_URL = "https://amahkudi.dev"
 export const postUrl = (slug: string) => `${SITE_URL}/blog/${slug}`
-export const AUTHOR = { name: "Henson Kudi Amah", url: SITE_URL }
+export const AUTHOR = {
+  name: "Henson Kudi Amah",
+  url: SITE_URL,
+  id: `${SITE_URL}/#person`,
+  image: `${SITE_URL}/android-chrome-512x512.png`,
+  sameAs: ["https://www.linkedin.com/in/henson-kudi-amah", "https://github.com/Henson-Kudi"],
+}
+// Author node used by every Article: the @id ties it to the Person declared
+// on the homepage so search engines treat them as one entity.
+export const authorLd = {
+  "@type": "Person",
+  "@id": AUTHOR.id,
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  image: AUTHOR.image,
+  sameAs: AUTHOR.sameAs,
+}
 
 // The subset of a post the JSON-LD needs. Plain strings so the admin form can
 // build a live preview from its own state before anything is saved.
@@ -80,8 +96,8 @@ export function buildArticleJsonLd(p: ArticleLdInput) {
     "@type": "Article",
     headline: p.seoTitle || p.title,
     description: p.seoDescription || p.excerpt || undefined,
-    author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
-    publisher: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
+    author: authorLd,
+    publisher: authorLd,
     datePublished: published,
     dateModified: iso(p.updatedAt) ?? published,
     image: p.coverImage || undefined,

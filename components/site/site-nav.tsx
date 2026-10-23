@@ -2,9 +2,9 @@ import Link from "next/link"
 import { ThemeToggle } from "./theme-toggle"
 
 const links = [
-  { label: "Work", href: "/#work" },
+  { label: "Work", href: "/projects" },
   { label: "Experience", href: "/#experience" },
-  { label: "Writing", href: "/#writing" },
+  { label: "Writing", href: "/blog" },
   { label: "Contact", href: "/#contact" },
 ]
 

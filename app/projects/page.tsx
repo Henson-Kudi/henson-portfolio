@@ -17,7 +17,13 @@ export const metadata: Metadata = {
   title: "Selected work",
   description,
   alternates: { canonical: `${SITE_URL}/projects` },
-  openGraph: { type: "website", url: `${SITE_URL}/projects`, title: "Selected work", description },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/projects`,
+    title: "Selected work",
+    description,
+    images: [{ url: `${SITE_URL}/android-chrome-512x512.png`, alt: "Henson Kudi Amah" }],
+  },
 }
 
 const wrap = "mx-auto max-w-[1120px] px-10 max-sm:px-6"
@@ -31,8 +37,31 @@ export default async function ProjectsPage({
   const { page, pageSize } = normalizePageParams({ page: sp.page }, { defaultPageSize: 9 })
   const result = await projectsRepo.listPublished({ page, pageSize })
 
+  // ItemList of the projects on this page, so search engines see the
+  // collection as a set of named works rather than anonymous links.
+  const listLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Selected work",
+    description,
+    url: `${SITE_URL}/projects`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: result.items.map((p, i) => ({
+        "@type": "ListItem",
+        position: (result.page - 1) * result.pageSize + i + 1,
+        url: `${SITE_URL}/projects/${p.slug}`,
+        name: p.title,
+      })),
+    },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(listLd).replace(/</g, "\\u003c") }}
+      />
       <SiteNav />
       <div className={wrap}>
         <PageHead

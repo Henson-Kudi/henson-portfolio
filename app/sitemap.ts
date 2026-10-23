@@ -13,14 +13,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.project.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
   ])
 
-  const latestPost = posts.reduce<Date | undefined>(
-    (acc, p) => (!acc || p.updatedAt > acc ? p.updatedAt : acc),
-    undefined,
-  )
+  const newest = (rows: { updatedAt: Date }[]) =>
+    rows.reduce<Date | undefined>((acc, p) => (!acc || p.updatedAt > acc ? p.updatedAt : acc), undefined)
+  const latestPost = newest(posts)
+  const latestProject = newest(projects)
+  const latestAny = [latestPost, latestProject]
+    .filter((d): d is Date => !!d)
+    .sort((a, b) => b.getTime() - a.getTime())[0]
 
   return [
-    { url: SITE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${SITE_URL}/projects`, changeFrequency: "monthly", priority: 0.8 },
+    { url: SITE_URL, lastModified: latestAny, changeFrequency: "weekly", priority: 1 },
+    { url: `${SITE_URL}/projects`, lastModified: latestProject, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/blog`, lastModified: latestPost, changeFrequency: "weekly", priority: 0.8 },
     ...projects.map((p) => ({
       url: `${SITE_URL}/projects/${p.slug}`,

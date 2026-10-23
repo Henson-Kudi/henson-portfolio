@@ -122,13 +122,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
         <div
           className="my-10 grid aspect-[1200/630] max-h-[560px] w-full place-items-center overflow-hidden rounded-md border border-border font-mono text-xs tracking-[0.08em] text-muted-foreground"
-          style={
-            p.coverImage
-              ? { backgroundImage: `url(${p.coverImage})`, backgroundSize: "cover", backgroundPosition: "center" }
-              : { backgroundImage: stripes }
-          }
+          style={p.coverImage ? undefined : { backgroundImage: stripes }}
         >
-          {!p.coverImage && `[ ${p.title.toLowerCase()} ]`}
+          {p.coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={p.coverImage} alt={`${p.title} cover`} className="h-full w-full object-cover" fetchPriority="high" />
+          ) : (
+            `[ ${p.title.toLowerCase()} ]`
+          )}
         </div>
 
         <div className="grid grid-cols-[1fr_300px] items-start gap-14 pb-20 pt-[50px] max-lg:grid-cols-1 max-lg:gap-9">

@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site/site-footer"
 import { postsRepo, type PostLink } from "@/lib/repositories/posts"
 import { fmtDate } from "@/lib/format"
 import { AUTHOR, SITE_URL, buildArticleJsonLd, postSources, postUrl } from "@/lib/post-utils"
+import { site, hero } from "@/lib/site-content"
 
 export const dynamic = "force-dynamic"
 
@@ -144,6 +145,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
           dangerouslySetInnerHTML={{ __html: p.body }}
         />
 
+        <AuthorBox />
+
         {(sources.length > 0 || related.length > 0 || children.length > 0) && (
           <aside className="mx-auto max-w-[70ch] border-t border-border pb-20 pt-10">
             {sources.length > 0 && (
@@ -172,6 +175,42 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
       </div>
       <SiteFooter />
     </>
+  )
+}
+
+// Who wrote this and how to reach them. Search engines weigh a named,
+// linked author; readers who want to hire get a path in one click.
+function AuthorBox() {
+  return (
+    <aside className="mx-auto flex max-w-[70ch] items-start gap-5 border-t border-border py-8 max-sm:flex-col">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/apple-touch-icon.png"
+        alt={site.name}
+        width={64}
+        height={64}
+        className="h-16 w-16 shrink-0 rounded-full border border-border object-cover"
+      />
+      <div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Written by</p>
+        <p className="mt-1 font-serif text-xl text-foreground">{site.name}</p>
+        <p className="mt-1.5 max-w-[56ch] text-[15px] leading-[1.6] text-ink-soft">
+          {site.role} in {site.location}. I build secure, high-availability backends for fintech, payments and
+          crypto, and lead the teams that ship them. {hero.availability}.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-4 font-mono text-[13px]">
+          <Link href="/#contact" className="text-brand underline underline-offset-4 hover:no-underline">
+            Work with me
+          </Link>
+          <a href={site.socials.linkedin} target="_blank" rel="noreferrer me" className="text-muted-foreground hover:text-brand">
+            LinkedIn
+          </a>
+          <a href={site.socials.github} target="_blank" rel="noreferrer me" className="text-muted-foreground hover:text-brand">
+            GitHub
+          </a>
+        </div>
+      </div>
+    </aside>
   )
 }
 
