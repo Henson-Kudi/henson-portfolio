@@ -28,8 +28,9 @@ export function Reveal({
     const el = ref.current
     if (!el) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    // Already in (or near) the viewport: leave it visible, no animation.
-    if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return
+    // Anything already touching the viewport stays visible: hiding it would
+    // flash (visible → hidden → fade in) and count as a late visual change.
+    if (el.getBoundingClientRect().top < window.innerHeight) return
     setState("hidden")
     const io = new IntersectionObserver(
       ([entry]) => {
