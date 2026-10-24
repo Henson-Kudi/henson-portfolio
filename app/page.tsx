@@ -139,7 +139,12 @@ export default async function HomePage() {
           <div>
             <div className="mb-[34px] inline-flex items-center gap-[9px] font-mono text-xs tracking-[0.06em] text-muted-foreground">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                {/* Pulse a few times then rest: an infinite animation keeps the page
+                    from ever being "visually complete", which inflates Speed Index. */}
+                <span
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60 motion-reduce:animate-none"
+                  style={{ animationIterationCount: 3 }}
+                />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               {hero.availability}
