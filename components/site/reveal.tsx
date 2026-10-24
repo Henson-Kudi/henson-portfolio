@@ -51,7 +51,7 @@ export function Reveal({
       ref={ref}
       style={state === "shown" ? { transitionDelay: `${delay}ms` } : undefined}
       className={cn(
-        state !== "idle" && "transition-[opacity,transform] duration-[400ms] ease-out",
+        state !== "idle" && "transition-[opacity,transform] [transition-duration:400ms] ease-out",
         state === "hidden" && "translate-y-5 opacity-0",
         className,
       )}

@@ -4,6 +4,8 @@ import { site } from "@/lib/site-content"
 const internal = [
   { label: "Work", href: "/projects" },
   { label: "Writing", href: "/blog" },
+  { label: "About", href: "/about" },
+  { label: "Hire", href: "/hire" },
   { label: "CV (PDF)", href: "/henson-resume.pdf" },
   { label: "RSS", href: "/feed.xml" },
 ]

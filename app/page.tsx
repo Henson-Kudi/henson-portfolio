@@ -11,6 +11,8 @@ import { fmtPeriod } from "@/lib/format"
 import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
 import { ContactForm } from "@/components/site/contact-form"
+import { ContactMethods } from "@/components/site/contact-methods"
+import { Headline, Bold } from "@/components/site/headline"
 import { Reveal } from "@/components/site/reveal"
 import { site, hero, about, services, stack, contact } from "@/lib/site-content"
 
@@ -41,39 +43,6 @@ export async function generateMetadata(): Promise<Metadata> {
       creator: seo?.twitterHandle ?? undefined,
     },
   }
-}
-
-// ---- small render helpers ----
-function Headline({ parts }: { parts: readonly (string | { em: string })[] }) {
-  return (
-    <>
-      {parts.map((p, i) =>
-        typeof p === "string" ? (
-          p
-        ) : (
-          <em key={i} className="italic text-brand">
-            {p.em}
-          </em>
-        ),
-      )}
-    </>
-  )
-}
-
-function Bold({ text }: { text: string }) {
-  return (
-    <>
-      {text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
-        i % 2 === 1 ? (
-          <strong key={i} className="font-semibold text-foreground">
-            {part}
-          </strong>
-        ) : (
-          part
-        ),
-      )}
-    </>
-  )
 }
 
 function fmtDate(d: Date | string | null): string {
@@ -188,6 +157,9 @@ export default async function HomePage() {
             <div className={secHead}>
               <span className={idx}>01</span>
               <h2 className={h2}>About</h2>
+              <Link href="/about" className="self-center font-mono text-[13px] text-brand hover:underline">
+                More about me →
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-[60px] max-md:grid-cols-1 max-md:gap-10">
               <div className="space-y-5">
@@ -228,6 +200,9 @@ export default async function HomePage() {
             <div className={secHead}>
               <span className={idx}>02</span>
               <h2 className={h2}>How I can help</h2>
+              <Link href="/hire" className="self-center font-mono text-[13px] text-brand hover:underline">
+                Ways to work together →
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-px border border-border bg-border max-md:grid-cols-1">
               {services.map((s) => (
@@ -398,22 +373,8 @@ export default async function HomePage() {
                 <Headline parts={contact.headline} />
               </h2>
               <p className="mt-[22px] max-w-[42ch] text-lg text-ink-soft">{contact.blurb}</p>
-              <div className="mt-[34px] flex flex-col">
-                <ContactMethod k="Email" href={`mailto:${site.email}`}>
-                  {site.email}
-                </ContactMethod>
-                <ContactMethod k="Phone" href={site.phone.href}>
-                  {site.phone.display}
-                </ContactMethod>
-                <ContactMethod k="WhatsApp" href={site.whatsapp.href} external>
-                  {site.whatsapp.display}
-                </ContactMethod>
-                <ContactMethod k="LinkedIn" href={site.socials.linkedin} external>
-                  henson-kudi-amah
-                </ContactMethod>
-                <ContactMethod k="GitHub" href={site.socials.github} external>
-                  Henson-Kudi
-                </ContactMethod>
+              <div className="mt-[34px]">
+                <ContactMethods />
               </div>
             </div>
             <ContactForm />
@@ -423,31 +384,6 @@ export default async function HomePage() {
 
       <SiteFooter />
     </>
-  )
-}
-
-function ContactMethod({
-  k,
-  href,
-  external,
-  children,
-}: {
-  k: string
-  href: string
-  external?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <a
-      href={href}
-      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-      className="flex items-center gap-3.5 border-b border-border py-3.5 text-base transition-colors hover:text-brand"
-    >
-      <span className="w-[90px] font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-        {k}
-      </span>
-      {children}
-    </a>
   )
 }
 

@@ -3,9 +3,9 @@ import { ThemeToggle } from "./theme-toggle"
 
 const links = [
   { label: "Work", href: "/projects" },
-  { label: "Experience", href: "/#experience" },
   { label: "Writing", href: "/blog" },
-  { label: "Contact", href: "/#contact" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/hire#contact" },
 ]
 
 export function SiteNav() {
@@ -26,7 +26,7 @@ export function SiteNav() {
             </Link>
           ))}
           <Link
-            href="/#contact"
+            href="/hire"
             className="rounded-[2px] border border-foreground bg-foreground px-[18px] py-[9px] text-sm text-background transition-colors hover:border-brand hover:bg-brand hover:text-white max-md:hidden"
           >
             Hire me
