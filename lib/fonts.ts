@@ -16,14 +16,17 @@ export const serif = Newsreader({
 export const sans = IBM_Plex_Sans({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600"],
+  // 500 is only ever used on serif elements; dropping it removes a 40 KB critical file.
+  weight: ["400", "600"],
   variable: "--font-sans",
 })
 
 export const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500"],
+  // Small labels only: no need to preload ahead of the document and CSS.
+  preload: false,
+  weight: ["400"],
   variable: "--font-mono",
 })
 
