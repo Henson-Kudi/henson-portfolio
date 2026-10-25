@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { liveWhere } from "@/lib/repositories/posts"
 import { AdminHeader } from "@/components/admin/admin-header"
 
 export const dynamic = "force-dynamic"
@@ -20,9 +21,9 @@ export default async function AdminDashboard() {
     await Promise.all([
       prisma.project.count({ where: { published: true } }),
       prisma.project.count({ where: { published: true, featured: true } }),
-      prisma.post.count({ where: { published: true } }),
+      prisma.post.count({ where: liveWhere() }),
       prisma.project.count({ where: { published: false } }),
-      prisma.post.count({ where: { published: false } }),
+      prisma.post.count({ where: { NOT: liveWhere() } }),
       prisma.project.findMany({
         where: { published: true, featured: true },
         orderBy: { order: "asc" },
@@ -37,8 +38,8 @@ export default async function AdminDashboard() {
         <div className="grid grid-cols-4 gap-3.5 max-sm:grid-cols-2">
           <Stat value={projPublished} label="Published projects" />
           <Stat value={projFeatured} label="Featured on home" />
-          <Stat value={postPublished} label="Published posts" />
-          <Stat value={projDrafts + postDrafts} label="Drafts" />
+          <Stat value={postPublished} label="Live posts" />
+          <Stat value={projDrafts + postDrafts} label="Drafts & scheduled" />
         </div>
 
         <div className="mt-7 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">

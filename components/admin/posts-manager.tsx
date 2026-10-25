@@ -10,6 +10,8 @@ import { StatusPill, FeaturedPill } from "./pills"
 import { IconBtn } from "./icon-btn"
 import { apiSend } from "@/lib/admin-fetch"
 import { cn } from "@/lib/utils"
+import { postStatus } from "@/lib/post-utils"
+import { fmtDateTime } from "@/lib/format"
 
 function move<T>(arr: T[], from: number, to: number): T[] {
   const next = arr.slice()
@@ -79,8 +81,9 @@ export function PostsManager({ initial }: { initial: Post[] }) {
     <>
       <div className="mb-5 flex items-start justify-between gap-4">
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Drafts stay hidden from the site. Featured posts show on the home page; all published
-          posts appear under “Writing”. Drag to reorder.
+          Drafts stay hidden from the site. A published post with a future date is scheduled and
+          goes live at that moment. Featured posts show on the home page; all live posts appear
+          under “Writing”. Drag to reorder.
         </p>
         <button
           type="button"
@@ -125,10 +128,11 @@ export function PostsManager({ initial }: { initial: Post[] }) {
                 <h3 className="flex flex-wrap items-center gap-2 font-serif text-base">
                   <span className="truncate">{p.title}</span>
                   {p.featured && <FeaturedPill />}
-                  <StatusPill published={p.published} />
+                  <StatusPill published={p.published} scheduled={postStatus(p) === "scheduled"} />
                 </h3>
                 <div className="mt-0.5 font-mono text-xs text-muted-foreground">
-                  {fmtDate(p.publishedAt)} &nbsp;/&nbsp; {p.tags.length} tags
+                  {postStatus(p) === "scheduled" ? `Goes live ${fmtDateTime(p.publishedAt)}` : fmtDate(p.publishedAt)}
+                  &nbsp;/&nbsp; {p.tags.length} tags
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
@@ -141,7 +145,13 @@ export function PostsManager({ initial }: { initial: Post[] }) {
                 </IconBtn>
                 <IconBtn
                   on={p.published}
-                  title={p.published ? "Published — click to draft" : "Draft — click to publish"}
+                  title={
+                    postStatus(p) === "scheduled"
+                      ? "Scheduled — click to unpublish"
+                      : p.published
+                        ? "Published — click to draft"
+                        : "Draft — click to publish now"
+                  }
                   onClick={() => patch(p, { published: !p.published })}
                 >
                   {p.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}

@@ -38,6 +38,22 @@ export function postSources(p: Pick<Post, "sources">): PostSource[] {
   )
 }
 
+// A post is live when it is marked published AND its publish time has passed.
+// A future publish time schedules it: the public pages are dynamic, so the
+// post appears at that moment with no cron job involved.
+export type PostStatus = "draft" | "scheduled" | "live"
+export function postStatus(
+  p: { published: boolean; publishedAt: Date | string | null | undefined },
+  now: Date = new Date(),
+): PostStatus {
+  if (!p.published) return "draft"
+  if (!p.publishedAt) return "live"
+  const at = typeof p.publishedAt === "string" ? new Date(p.publishedAt) : p.publishedAt
+  return Number.isNaN(at.getTime()) || at <= now ? "live" : "scheduled"
+}
+export const isLive = (p: { published: boolean; publishedAt: Date | string | null | undefined }) =>
+  postStatus(p) === "live"
+
 export const SITE_URL = "https://amahkudi.dev"
 export const postUrl = (slug: string) => `${SITE_URL}/blog/${slug}`
 export const AUTHOR = {

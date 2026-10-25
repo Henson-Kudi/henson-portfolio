@@ -10,7 +10,14 @@ const orderBy = [
   { publishedAt: "desc" },
 ] satisfies Prisma.PostOrderByWithRelationInput[]
 
-async function page(where: { published?: boolean }, params?: Partial<PageParams>) {
+// Public visibility: published AND publish time reached (or unset). Evaluated
+// per request so a scheduled post flips to live on its own.
+export const liveWhere = (): Prisma.PostWhereInput => ({
+  published: true,
+  OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+})
+
+async function page(where: Prisma.PostWhereInput, params?: Partial<PageParams>) {
   const { page, pageSize } = normalizePageParams(params)
   const [items, total] = await prisma.$transaction([
     prisma.post.findMany({ where, orderBy, skip: (page - 1) * pageSize, take: pageSize }),
@@ -33,7 +40,7 @@ export type PostLink = Prisma.PostGetPayload<{ select: typeof linkSelect }>
 export const postsRepo = {
   // Homepage uses listPublished({ pageSize: 4 }) → 4 items + hasMore.
   listAll: (params?: Partial<PageParams>) => page({}, params),
-  listPublished: (params?: Partial<PageParams>) => page({ published: true }, params),
+  listPublished: (params?: Partial<PageParams>) => page(liveWhere(), params),
   getById: (id: string) => prisma.post.findUnique({ where: { id } }),
   getBySlug: (slug: string) => prisma.post.findUnique({ where: { slug } }),
 
@@ -41,7 +48,7 @@ export const postsRepo = {
   getPublishedBySlugs: async (slugs: string[]): Promise<PostLink[]> => {
     if (slugs.length === 0) return []
     const rows = await prisma.post.findMany({
-      where: { slug: { in: slugs }, published: true },
+      where: { slug: { in: slugs }, ...liveWhere() },
       select: linkSelect,
     })
     const bySlug = new Map(rows.map((r) => [r.slug, r]))
@@ -50,13 +57,13 @@ export const postsRepo = {
 
   // Published posts that name `slug` as their hub → the hub's "down" links.
   getPublishedChildren: (slug: string): Promise<PostLink[]> =>
-    prisma.post.findMany({ where: { hubSlug: slug, published: true }, orderBy, select: linkSelect }),
+    prisma.post.findMany({ where: { hubSlug: slug, ...liveWhere() }, orderBy, select: linkSelect }),
 
   // Published posts with the fields needed to match them to a project
   // (tags / keywords / title) for the "Related writing" box on case studies.
   listPublishedForMatching: () =>
     prisma.post.findMany({
-      where: { published: true },
+      where: liveWhere(),
       select: { ...linkSelect, tags: true, keywords: true, primaryKeyword: true, category: true },
       orderBy,
     }),
@@ -64,19 +71,29 @@ export const postsRepo = {
   // For the sitemap.
   listPublishedForSitemap: () =>
     prisma.post.findMany({
-      where: { published: true },
+      where: liveWhere(),
       select: { slug: true, updatedAt: true, publishedAt: true },
       orderBy,
     }),
 
+  // Publishing without a date means "now": the date doubles as the display
+  // date, and a dated row is what the live filter and feeds sort on.
   create: (data: PostInput) =>
     prisma.post.create({
-      data: withStats({ ...data, slug: data.slug?.trim() || slugify(data.title) }),
+      data: withStats({
+        ...data,
+        slug: data.slug?.trim() || slugify(data.title),
+        publishedAt: data.publishedAt ?? (data.published ? new Date() : undefined),
+      }),
     }),
 
-  update: (id: string, data: Partial<PostInput>) => {
+  update: async (id: string, data: Partial<PostInput>) => {
     const patch: Partial<PostInput> = withStats({ ...data })
     if (data.title && !data.slug) patch.slug = slugify(data.title)
+    if (data.published === true && data.publishedAt === undefined) {
+      const existing = await prisma.post.findUnique({ where: { id }, select: { publishedAt: true } })
+      if (existing && !existing.publishedAt) patch.publishedAt = new Date()
+    }
     return prisma.post.update({ where: { id }, data: patch })
   },
 

@@ -6,7 +6,7 @@ import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
 import { postsRepo, type PostLink } from "@/lib/repositories/posts"
 import { fmtDate } from "@/lib/format"
-import { AUTHOR, SITE_URL, buildArticleJsonLd, postSources, postUrl } from "@/lib/post-utils"
+import { AUTHOR, SITE_URL, buildArticleJsonLd, postSources, postUrl, isLive } from "@/lib/post-utils"
 import { site, hero } from "@/lib/site-content"
 
 export const dynamic = "force-dynamic"
@@ -21,7 +21,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const p = await postsRepo.getBySlug((await params).slug)
-  if (!p || !p.published) return { title: "Post not found", robots: { index: false } }
+  if (!p || !isLive(p)) return { title: "Post not found", robots: { index: false } }
   const title = p.seoTitle || p.title
   const description = p.seoDescription || p.excerpt || undefined
   const url = postUrl(p.slug)
@@ -55,7 +55,7 @@ export async function generateMetadata({
 
 export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const p = await postsRepo.getBySlug((await params).slug)
-  if (!p || !p.published) notFound()
+  if (!p || !isLive(p)) notFound()
 
   // Internal links: up (hub), across (related), down (posts naming this one as hub).
   const [hub, related, children] = await Promise.all([

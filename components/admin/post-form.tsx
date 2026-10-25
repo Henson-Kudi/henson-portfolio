@@ -7,14 +7,24 @@ import { Field, Checkbox, controlClass, labelClass } from "./field"
 import { RichTextEditor } from "./rte"
 import { postInput, type PostSource } from "@/lib/validation"
 import { apiSend } from "@/lib/admin-fetch"
-import { bodyStats, buildArticleJsonLd, keywordPlacement, postSources, postUrl } from "@/lib/post-utils"
+import { bodyStats, buildArticleJsonLd, keywordPlacement, postSources, postStatus, postUrl } from "@/lib/post-utils"
+import { fmtDateTime } from "@/lib/format"
 import { slugify } from "@/lib/slug"
 import { cn } from "@/lib/utils"
 
-function toDateInput(d: Date | string | null | undefined): string {
+// <input type="datetime-local"> wants "YYYY-MM-DDTHH:mm" in the viewer's local
+// time; the value is converted back to an ISO instant before it is sent.
+function toDateTimeInput(d: Date | string | null | undefined): string {
   if (!d) return ""
   const dt = typeof d === "string" ? new Date(d) : d
-  return Number.isNaN(dt.getTime()) ? "" : dt.toISOString().slice(0, 10)
+  if (Number.isNaN(dt.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`
+}
+const toInstant = (local: string): string | undefined => {
+  if (!local) return undefined
+  const dt = new Date(local)
+  return Number.isNaN(dt.getTime()) ? undefined : dt.toISOString()
 }
 
 const splitList = (s: string) =>
@@ -42,7 +52,7 @@ export function PostForm({ initial, others = [], onCancel, onSaved, onError }: P
   const [f, setF] = useState({
     title: initial?.title ?? "",
     slug: initial?.slug ?? "",
-    publishedAt: toDateInput(initial?.publishedAt),
+    publishedAt: toDateTimeInput(initial?.publishedAt),
     tags: (initial?.tags ?? []).join(", "),
     excerpt: initial?.excerpt ?? "",
     coverImage: initial?.coverImage ?? "",
@@ -108,7 +118,7 @@ export function PostForm({ initial, others = [], onCancel, onSaved, onError }: P
   const otherSlugs = others.filter((p) => p.id !== initial?.id).map((p) => p.slug)
   const linkStatus = (slug: string): "ok" | "draft" | "missing" => {
     const p = bySlug.get(slug)
-    return !p ? "missing" : p.published ? "ok" : "draft"
+    return !p ? "missing" : postStatus(p) === "live" ? "ok" : "draft"
   }
 
   async function save() {
@@ -122,7 +132,7 @@ export function PostForm({ initial, others = [], onCancel, onSaved, onError }: P
       tags: splitList(f.tags),
       featured: f.featured,
       published: f.published,
-      publishedAt: f.publishedAt || undefined,
+      publishedAt: toInstant(f.publishedAt),
       category: f.category,
       postType: f.postType,
       seoTitle: f.seoTitle,
@@ -169,8 +179,11 @@ export function PostForm({ initial, others = [], onCancel, onSaved, onError }: P
         <Field label="Slug" help={f.slug ? undefined : `auto: /blog/${effectiveSlug || "…"}`}>
           <input {...text("slug")} placeholder={effectiveSlug} />
         </Field>
-        <Field label="Date" help="Displayed publish date">
-          <input type="date" {...text("publishedAt")} />
+        <Field
+          label="Publish date & time"
+          help="Your local time. A future time schedules the post: it goes live then, automatically. Leave empty to publish immediately on save."
+        >
+          <input type="datetime-local" {...text("publishedAt")} />
         </Field>
         <Field label="Excerpt" help="Shown in the list and as the lede. Also the fallback meta description." full>
           <textarea rows={2} {...text("excerpt")} />
@@ -350,6 +363,7 @@ export function PostForm({ initial, others = [], onCancel, onSaved, onError }: P
           <Checkbox label="Published" checked={f.published} onChange={(v) => set("published", v)} />
           <Checkbox label="Feature on home page" checked={f.featured} onChange={(v) => set("featured", v)} />
         </div>
+        <PublishStatus published={f.published} publishedAt={f.publishedAt} />
       </Section>
 
       <div className="mt-6 flex justify-end gap-2.5 border-t border-border pt-4">
@@ -397,9 +411,28 @@ function Counted({ value, max, children }: { value: string; max: number; childre
   )
 }
 
+// Plain-language readout of what saving will do, so scheduling is never a surprise.
+function PublishStatus({ published, publishedAt }: { published: boolean; publishedAt: string }) {
+  const at = publishedAt ? new Date(publishedAt) : null
+  const status = postStatus({ published, publishedAt: at })
+  let text: string
+  let tone = "text-muted-foreground"
+  if (status === "draft") text = "Draft — hidden from the site, feeds and sitemap."
+  else if (status === "scheduled") {
+    const hours = Math.max(1, Math.round((at!.getTime() - Date.now()) / 36e5))
+    const when = hours < 48 ? `in about ${hours} hour${hours === 1 ? "" : "s"}` : `in ${Math.round(hours / 24)} days`
+    text = `Scheduled — goes live ${fmtDateTime(at)} (${when}). Until then it is hidden everywhere, like a draft.`
+    tone = "text-sky-700 dark:text-sky-400"
+  } else {
+    text = at ? `Live — dated ${fmtDateTime(at)}.` : "Live immediately on save — the date will be set to now."
+    tone = "text-emerald-700 dark:text-emerald-400"
+  }
+  return <p className={cn("col-span-full font-mono text-[12px]", tone)}>{text}</p>
+}
+
 function LinkStatus({ slugs, status }: { slugs: string[]; status: (s: string) => "ok" | "draft" | "missing" }) {
   if (slugs.length === 0) return null
-  const label = { ok: "live", draft: "draft — hidden until published", missing: "no post with this slug yet" }
+  const label = { ok: "live", draft: "not live yet (draft or scheduled)", missing: "no post with this slug yet" }
   return (
     <ul className="mt-1.5 flex flex-col gap-0.5 font-mono text-[11px]">
       {slugs.map((s) => {

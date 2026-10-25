@@ -17,6 +17,15 @@ export function fmtDate(d: Date | string | null | undefined): string {
     : dt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
 }
 
+// "Oct 26, 2026, 9:00 AM" (viewer's local time zone)
+export function fmtDateTime(d: Date | string | null | undefined): string {
+  if (!d) return ""
+  const dt = typeof d === "string" ? new Date(d) : d
+  return Number.isNaN(dt.getTime())
+    ? ""
+    : dt.toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+}
+
 // "Jan 2026 — Present" / "Mar 2025 — Jan 2026"
 export function fmtPeriod(
   start: Date | string,
