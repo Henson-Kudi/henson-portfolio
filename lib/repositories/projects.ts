@@ -21,6 +21,9 @@ export const projectsRepo = {
   listPublished: (params?: Partial<PageParams>) => page({ published: true }, params),
   getById: (id: string) => prisma.project.findUnique({ where: { id } }),
   getBySlug: (slug: string) => prisma.project.findUnique({ where: { slug } }),
+  // Ordered slugs + titles of every published project, for prev/next links.
+  listPublishedNav: () =>
+    prisma.project.findMany({ where: { published: true }, orderBy, select: { slug: true, title: true } }),
 
   create: (data: ProjectInput) =>
     prisma.project.create({ data: { ...data, slug: data.slug?.trim() || slugify(data.title) } }),

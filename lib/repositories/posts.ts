@@ -52,6 +52,15 @@ export const postsRepo = {
   getPublishedChildren: (slug: string): Promise<PostLink[]> =>
     prisma.post.findMany({ where: { hubSlug: slug, published: true }, orderBy, select: linkSelect }),
 
+  // Published posts with the fields needed to match them to a project
+  // (tags / keywords / title) for the "Related writing" box on case studies.
+  listPublishedForMatching: () =>
+    prisma.post.findMany({
+      where: { published: true },
+      select: { ...linkSelect, tags: true, keywords: true, primaryKeyword: true, category: true },
+      orderBy,
+    }),
+
   // For the sitemap.
   listPublishedForSitemap: () =>
     prisma.post.findMany({
