@@ -95,9 +95,9 @@ export default async function BlogPage({
                       ) : null}
                     </div>
                     <div>
-                      <h3 className="font-serif text-[26px] font-medium tracking-[-0.01em]">
+                      <h2 className="font-serif text-[26px] font-medium tracking-[-0.01em]">
                         {p.title}
-                      </h3>
+                      </h2>
                       {p.excerpt && (
                         <p className="mt-2 max-w-[64ch] text-base leading-[1.55] text-ink-soft">
                           {p.excerpt}

@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextResponse, after } from "next/server"
 import { requireAdmin, parseBody } from "@/lib/api"
 import { projectInput } from "@/lib/validation"
 import { projectsRepo } from "@/lib/repositories/projects"
 import { parsePageParams } from "@/lib/pagination"
+import { notifyIndexNow, projectUrls } from "@/lib/indexnow"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -20,5 +21,7 @@ export async function POST(req: Request) {
   if (error) return error
   const parsed = await parseBody(req, projectInput)
   if (parsed.error) return parsed.error
-  return NextResponse.json(await projectsRepo.create(parsed.data), { status: 201 })
+  const created = await projectsRepo.create(parsed.data)
+  if (created.published) after(() => notifyIndexNow(projectUrls(created.slug)))
+  return NextResponse.json(created, { status: 201 })
 }

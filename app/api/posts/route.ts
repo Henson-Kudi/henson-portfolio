@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server"
+import { NextResponse, after } from "next/server"
 import { requireAdmin, parseBody } from "@/lib/api"
 import { postInput } from "@/lib/validation"
 import { postsRepo } from "@/lib/repositories/posts"
 import { parsePageParams } from "@/lib/pagination"
+import { isLive } from "@/lib/post-utils"
+import { notifyIndexNow, postUrls } from "@/lib/indexnow"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -20,5 +22,7 @@ export async function POST(req: Request) {
   if (error) return error
   const parsed = await parseBody(req, postInput)
   if (parsed.error) return parsed.error
-  return NextResponse.json(await postsRepo.create(parsed.data), { status: 201 })
+  const created = await postsRepo.create(parsed.data)
+  if (isLive(created)) after(() => notifyIndexNow(postUrls(created.slug)))
+  return NextResponse.json(created, { status: 201 })
 }

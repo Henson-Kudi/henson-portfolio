@@ -5,7 +5,9 @@ import type { Project } from "@prisma/client"
 const stripes =
   "repeating-linear-gradient(135deg, hsl(var(--paper-2)) 0 12px, hsl(var(--card)) 12px 24px)"
 
-export function ProjectCard({ project: p }: { project: Project }) {
+// `heading` keeps the outline valid: h2 directly under a page h1, h3 inside
+// a section that already has an h2 (the homepage).
+export function ProjectCard({ project: p, heading: H = "h3" }: { project: Project; heading?: "h2" | "h3" }) {
   return (
     <Link
       href={`/projects/${p.slug}`}
@@ -33,7 +35,7 @@ export function ProjectCard({ project: p }: { project: Project }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-7">
-        <h3 className="font-serif text-[28px] font-medium tracking-[-0.01em]">{p.title}</h3>
+        <H className="font-serif text-[28px] font-medium tracking-[-0.01em]">{p.title}</H>
         {(p.role || p.org) && (
           <div className="mb-3 mt-1.5 font-serif text-sm italic text-muted-foreground">
             {[p.role, p.org].filter(Boolean).join(" · ")}

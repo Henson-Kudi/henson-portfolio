@@ -82,7 +82,7 @@ export default async function ProjectsPage({
             <>
               <div className="grid grid-cols-2 gap-[22px] max-md:grid-cols-1">
                 {result.items.map((p) => (
-                  <ProjectCard key={p.id} project={p} />
+                  <ProjectCard key={p.id} project={p} heading="h2" />
                 ))}
               </div>
               <Pager page={result.page} totalPages={result.totalPages} basePath="/projects" />

@@ -2,6 +2,8 @@
 // rarely and the wording is tuned for search, so edits are a code review away.
 
 export const hirePage = {
+  // Bump when the copy changes: feeds the sitemap lastmod for /hire.
+  updated: "2026-10-25",
   // Title ≤ 60 chars before the " | Henson Kudi Amah" template suffix.
   title: "Hire a Fintech & Crypto Backend Engineer",
   // 150–160 chars.
@@ -116,6 +118,8 @@ export const hirePage = {
 }
 
 export const aboutPage = {
+  // Bump when the copy changes: feeds the sitemap lastmod for /about.
+  updated: "2026-10-25",
   title: "About Henson Kudi Amah",
   description:
     "Senior full-stack engineer and team lead in Dubai: from accounting and finance to VARA-regulated crypto custody, payments backends and offline-first software.",

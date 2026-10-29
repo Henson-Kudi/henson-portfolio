@@ -2,6 +2,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { liveWhere } from "@/lib/repositories/posts"
 import { AdminHeader } from "@/components/admin/admin-header"
+import { IndexNowButton } from "@/components/admin/indexnow-button"
 
 export const dynamic = "force-dynamic"
 
@@ -60,6 +61,17 @@ export default async function AdminDashboard() {
               {a.label}
             </Link>
           ))}
+        </div>
+
+        <div className="mt-7 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+          Search engines
+        </div>
+        <div className="mt-3">
+          <IndexNowButton />
+          <p className="mt-2 max-w-[62ch] text-[13px] leading-relaxed text-muted-foreground">
+            Saving a live post or project already notifies Bing (IndexNow). Use this after a scheduled post goes
+            live, or after editing the Hire or About copy. Google is separate: request indexing in Search Console.
+          </p>
         </div>
 
         <div className="mt-7 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
