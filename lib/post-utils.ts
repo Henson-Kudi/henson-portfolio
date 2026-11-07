@@ -3,6 +3,23 @@ import type { PostSource } from "@/lib/validation"
 
 // Shared helpers for posts. Pure functions, safe on both server and client.
 
+// Forward links. A body may link to a post that is not live yet (a hub
+// naming its spokes ahead of time). Until that post goes live the link is
+// rendered as plain text followed by "(coming)", so neither readers nor
+// crawlers are sent to a 404. The moment the target is live, the same body
+// renders the link: nothing to edit on publish day.
+const BLOG_LINK_RE = /<a\b([^>]*?)href="\/blog\/([a-z0-9-]+)\/?(?:[#?][^"]*)?"([^>]*)>([\s\S]*?)<\/a>/gi
+
+export function bodyLinkSlugs(body: string): string[] {
+  return Array.from(new Set(Array.from(body.matchAll(BLOG_LINK_RE), (m) => m[2])))
+}
+
+export function resolveForwardLinks(body: string, liveSlugs: Set<string>): string {
+  return body.replace(BLOG_LINK_RE, (whole, _pre, slug, _post, inner) =>
+    liveSlugs.has(slug) ? whole : `${inner} (coming)`,
+  )
+}
+
 // Strip HTML to plain text (good enough for counting words / building a
 // description — not a sanitizer).
 export function htmlToText(html: string): string {

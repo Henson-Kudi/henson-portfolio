@@ -6,7 +6,16 @@ import { SiteNav } from "@/components/site/site-nav"
 import { SiteFooter } from "@/components/site/site-footer"
 import { postsRepo, type PostLink } from "@/lib/repositories/posts"
 import { fmtDate } from "@/lib/format"
-import { AUTHOR, SITE_URL, buildArticleJsonLd, postSources, postUrl, isLive } from "@/lib/post-utils"
+import {
+  AUTHOR,
+  SITE_URL,
+  buildArticleJsonLd,
+  postSources,
+  postUrl,
+  isLive,
+  bodyLinkSlugs,
+  resolveForwardLinks,
+} from "@/lib/post-utils"
 import { site, hero } from "@/lib/site-content"
 
 export const dynamic = "force-dynamic"
@@ -58,11 +67,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
   if (!p || !isLive(p)) notFound()
 
   // Internal links: up (hub), across (related), down (posts naming this one as hub).
-  const [hub, related, children] = await Promise.all([
+  const [hub, related, children, linked] = await Promise.all([
     p.hubSlug ? postsRepo.getPublishedBySlugs([p.hubSlug]).then((r) => r[0] ?? null) : null,
     postsRepo.getPublishedBySlugs(p.relatedSlugs.filter((s) => s !== p.slug)),
     postsRepo.getPublishedChildren(p.slug),
+    postsRepo.getPublishedBySlugs(bodyLinkSlugs(p.body)),
   ])
+  // Links to posts that are not live yet render as "(coming)" text for now.
+  const body = resolveForwardLinks(p.body, new Set(linked.map((l) => l.slug)))
   const sources = postSources(p)
 
   const articleLd = buildArticleJsonLd(p)
@@ -145,7 +157,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
         {/* Body is authored by the admin (trusted) via the rich-text editor. */}
         <article
           className="article-body mx-auto max-w-[70ch] pb-14 pt-[50px]"
-          dangerouslySetInnerHTML={{ __html: p.body }}
+          dangerouslySetInnerHTML={{ __html: body }}
         />
 
         <AuthorBox />
